@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learnlight Coach (demo)</title>
+<script src="https://res.cdn.office.net/teams-js/2.19.0/js/MicrosoftTeams.min.js" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #f5f5f7; --surface: #ffffff; --surface-2: #f0f1f5; --border: #e1e3ea;
+    --text: #1c1d22; --muted: #5f6370; --brand: #0f6b74; --brand-soft: #e3f2f3; --brand-ink: #ffffff;
+    --accent: #e8743b; --good: #1e8a4c; --warn: #b7791f; --bad: #c0392b;
+    --shadow: 0 1px 2px rgba(20,20,40,.06), 0 2px 8px rgba(20,20,40,.05);
+    --radius: 10px;
+  }
+  body.dark {
+    --bg: #1f1f23; --surface: #2a2b30; --surface-2: #33343a; --border: #3d3e45;
+    --text: #ececf0; --muted: #a5a8b3; --brand: #3fb5be; --brand-soft: #1f3b3e; --brand-ink: #0d1b1d;
+    --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.45; }
+  button { font: inherit; cursor: pointer; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); }
+  .user { margin-left: auto; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; flex: none; }
+  nav { display: flex; gap: 4px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; padding: 12px 14px; color: var(--muted); font-weight: 600; border-bottom: 3px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--brand); border-bottom-color: var(--brand); }
+  main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+  h2 { font-size: 18px; margin: 0 0 4px; }
+  h3 { font-size: 15px; margin: 0 0 10px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .grid-2 { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } .user span { display: none; } }
+  .meeting { display: flex; gap: 12px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 8px; cursor: pointer; text-align: left; width: 100%; color: var(--text); }
+  .meeting:hover { border-color: var(--brand); }
+  .meeting.active { border-color: var(--brand); background: var(--brand-soft); }
+  .day { text-align: center; min-width: 44px; }
+  .day b { display: block; font-size: 18px; }
+  .day small { color: var(--muted); text-transform: uppercase; font-size: 11px; font-weight: 600; }
+  .m-title { font-weight: 600; }
+  .m-meta { color: var(--muted); font-size: 12.5px; }
+  .flag { font-size: 12px; font-weight: 600; color: var(--brand); }
+  .insight { background: var(--brand-soft); border-left: 4px solid var(--brand); padding: 12px 14px; border-radius: 6px; margin: 12px 0 16px; font-weight: 500; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+  ul.list { margin: 0; padding-left: 0; list-style: none; }
+  ul.list li { padding: 5px 0 5px 24px; position: relative; }
+  ul.do li::before { content: "✓"; position: absolute; left: 2px; color: var(--good); font-weight: 700; }
+  ul.avoid li::before { content: "✕"; position: absolute; left: 2px; color: var(--bad); font-weight: 700; }
+  .dims { display: grid; gap: 12px; margin: 6px 0 16px; }
+  .dim-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .dim-labels b { color: var(--text); font-weight: 600; }
+  .track { height: 8px; background: var(--surface-2); border-radius: 99px; position: relative; }
+  .dot { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--brand); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--brand); transition: left .6s ease; }
+  .phrase { background: var(--surface-2); padding: 9px 12px; border-radius: 6px; margin-bottom: 6px; font-style: italic; }
+  .source { font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 16px; padding-top: 12px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: 6px; font-weight: 600; }
+  .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  .btn:hover { filter: brightness(.96); }
+  .shimmer { display: grid; gap: 10px; }
+  .shimmer div { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: sh 1.1s infinite; }
+  @keyframes sh { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  .ai-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .ai-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  textarea, select { width: 100%; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+  textarea { min-height: 210px; resize: vertical; }
+  label.lbl { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin: 0 0 6px; }
+  .scores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .score { background: var(--surface-2); border-radius: 8px; padding: 10px; text-align: center; }
+  .score b { font-size: 22px; display: block; }
+  .score small { color: var(--muted); font-size: 12px; }
+  .issue { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .issue q { background: rgba(232,116,59,.18); padding: 1px 4px; border-radius: 4px; quotes: none; font-weight: 600; }
+  .issue p { margin: 6px 0 0; color: var(--muted); }
+  .rewrite { white-space: pre-wrap; background: var(--brand-soft); padding: 14px; border-radius: 8px; font-size: 13.5px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi b { font-size: 24px; display: block; }
+  .kpi small { color: var(--muted); }
+  .bar-row { display: grid; grid-template-columns: 90px 1fr 44px; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .bar { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .gap { color: var(--bad); font-weight: 700; }
+  .trainer { display: flex; gap: 14px; align-items: center; }
+  .trainer .avatar { width: 52px; height: 52px; font-size: 18px; background: var(--brand); }
+  .challenge { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .challenge:last-child { border-bottom: 0; }
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); white-space: nowrap; height: fit-content; }
+  .switch { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; font-weight: 600; }
+  .switch input { width: 38px; height: 20px; accent-color: var(--brand); }
+  .progress { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: 6px 0 12px; }
+  .progress span { display: block; height: 100%; background: var(--accent); }
+  .vocab { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .vocab div { background: var(--surface-2); border-radius: 8px; padding: 10px; }
+  .vocab b { display: block; }
+  .vocab small { color: var(--muted); }
+  .stack { display: grid; gap: 16px; }
+  .soon { display: flex; align-items: center; gap: 12px; border: 1px dashed var(--border); border-radius: var(--radius); padding: 14px 18px; color: var(--muted); margin-top: 20px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-weight: 600; transition: transform .25s ease; z-index: 10; max-width: 90vw; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M8 10.5c0-1.4 1.1-2.5 2.5-2.5h7c1.4 0 2.5 1.1 2.5 2.5v4c0 1.4-1.1 2.5-2.5 2.5H13l-3 2.5V17h0c-1.1-.2-2-1.2-2-2.5z" fill="#fff"/><path d="M22 13h1.5c1.4 0 2.5 1.1 2.5 2.5v4c0 1.3-.9 2.3-2 2.5V24l-3-2.5h-4.5c-1 0-1.9-.6-2.3-1.5H18c2.2 0 4-1.8 4-4z" fill="#fff" opacity=".65"/></svg>
+    Learnlight Coach <span class="badge">Demo</span>
+  </div>
+  <div class="user"><span>Alex Morgan · Account Manager</span><div class="avatar">AM</div></div>
+</header>
+<nav id="nav">
+  <button data-tab="week" class="active">My week</button>
+  <button data-tab="email">Email coach</button>
+  <button data-tab="trainer">My trainer</button>
+  <button data-tab="team">Team insights</button>
+</nav>
+<main>
+  <!-- MY WEEK -->
+  <section id="tab-week">
+    <h2>Your week across cultures</h2>
+    <p class="sub">5 meetings with international contacts. Select one to get your 1 minute cultural briefing.</p>
+    <div class="grid-2">
+      <div id="meetings"></div>
+      <div class="card" id="briefing"></div>
+    </div>
+    <div class="soon"><span style="font-size:20px">🔜</span><div><b>Coming next: Handover assistant.</b> When you change role or country, Coach builds your handover from your meetings, threads and an interview with you.</div></div>
+  </section>
+
+  <!-- EMAIL COACH -->
+  <section id="tab-email" class="hidden">
+    <h2>Email coach</h2>
+    <p class="sub">Check if your message fits the culture of the person who will read it. Not just grammar: tone, structure and relationship.</p>
+    <div class="grid-2">
+      <div class="card">
+        <label class="lbl" for="sample">Recipient</label>
+        <select id="sample">
+          <option value="jp">Kenji Watanabe · Nakamura Logistics · Japan</option>
+          <option value="de">Lukas Becker · Brenner Automotive · Germany</option>
+          <option value="br">Ana Souza · Atlântica Energia · Brazil</option>
+        </select>
+        <label class="lbl" for="draft" style="margin-top:12px">Your draft</label>
+        <textarea id="draft"></textarea>
+        <div class="actions"><button class="btn primary" id="review">Review for cultural fit</button></div>
+        <p class="note">Demo mode: feedback is pre-written for the sample drafts. In the pilot, the AI reviews any text.</p>
+      </div>
+      <div class="card" id="emailResult"><p class="sub" style="margin:0">Your review will appear here.</p></div>
+    </div>
+  </section>
+
+  <!-- TRAINER -->
+  <section id="tab-trainer" class="hidden">
+    <h2>My trainer</h2>
+    <p class="sub">Your Learnlight sessions, connected to the real challenges in your week.</p>
+    <div class="grid-2">
+      <div class="stack">
+        <div class="card">
+          <div class="trainer"><div class="avatar">CD</div><div><b>Claire Dubois</b><div class="m-meta">Intercultural and Business English trainer</div></div></div>
+          <div class="source" style="margin-top:14px;border-top:0;padding-top:0">
+            <b style="color:var(--text)">Next session</b><br>Thursday 19 Nov · 16:00 · Online in Teams
+          </div>
+          <div class="actions"><button class="btn primary" data-toast="Joining your session with Claire (demo)">Join session</button><button class="btn" data-toast="Message sent to Claire (demo)">Message Claire</button></div>
+        </div>
+        <div class="card">
+          <h3>Your progress</h3>
+          <div class="m-meta">Business English · B2+ to C1</div>
+          <div class="progress"><span style="width:58%"></span></div>
+          <div class="m-meta">Sessions completed: 7 of 12</div>
+          <div class="kpis" style="grid-template-columns:1fr 1fr;margin:14px 0 0">
+            <div class="kpi"><b>14</b><small>briefings used</small></div>
+            <div class="kpi"><b>6</b><small>emails reviewed</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <h3>From your week to your next session</h3>
+          <p class="m-meta" style="margin-top:-6px">Coach suggests what to practice, based on your upcoming meetings.</p>
+          <div class="challenge"><span class="pill">MON · JAPAN</span><div><b>Pricing negotiation</b><div class="m-meta">Practice: handling silence and indirect answers</div></div></div>
+          <div class="challenge"><span class="pill">TUE · GERMANY</span><div><b>Project kickoff</b><div class="m-meta">Practice: presenting a structured plan and answering detailed questions</div></div></div>
+          <div class="challenge"><span class="pill">FRI · BRAZIL</span><div><b>Contract renewal</b><div class="m-meta">Practice: building rapport before getting to business</div></div></div>
+          <label class="switch"><input type="checkbox" id="share" checked> Share these topics with Claire</label>
+          <p class="note" style="margin:0">You decide what your trainer sees. Only meeting topics and cultures are shared, never the content of your emails or chats.</p>
+        </div>
+        <div class="card">
+          <h3>Vocabulary from your week</h3>
+          <div class="vocab">
+            <div><b>lead time</b><small>Time between an order and its delivery. "Our lead time is two weeks."</small></div>
+            <div><b>renewal terms</b><small>Conditions for extending a contract. "Let's review the renewal terms."</small></div>
+            <div><b>scope creep</b><small>When a project grows beyond what was agreed.</small></div>
+            <div><b>to push back</b><small>To politely resist a request or deadline.</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM INSIGHTS -->
+  <section id="tab-team" class="hidden">
+    <h2>Team insights · Sales EMEA</h2>
+    <p class="sub">The L&amp;D and manager view. Where your people communicate across cultures, and where training would have the most impact.</p>
+    <div class="kpis">
+      <div class="card kpi"><b>36 / 42</b><small>active users this month</small></div>
+      <div class="card kpi"><b>214</b><small>cultural briefings opened</small></div>
+      <div class="card kpi"><b>158</b><small>emails reviewed</small></div>
+      <div class="card kpi"><b style="color:var(--good)">+22 pts</b><small>average tone fit improvement</small></div>
+    </div>
+    <div class="grid-2" style="grid-template-columns: 1fr 1.4fr">
+      <div class="card">
+        <h3>Who your team works with</h3>
+        <p class="m-meta" style="margin-top:-6px;margin-bottom:14px">Share of international meetings, last 90 days</p>
+        <div id="bars"></div>
+      </div>
+      <div class="card">
+        <h3>Training gaps detected</h3>
+        <table>
+          <thead><tr><th>Culture</th><th>People meeting weekly</th><th>Trained</th><th>Recommended</th></tr></thead>
+          <tbody>
+            <tr><td><b>Japan</b></td><td>14</td><td><span class="gap">3</span></td><td>Working Effectively With Japan · half day workshop</td></tr>
+            <tr><td><b>India</b></td><td>11</td><td><span class="gap">2</span></td><td>Working Effectively With India · half day workshop</td></tr>
+            <tr><td><b>Germany</b></td><td>22</td><td>15</td><td>CultureConnector self study for 7 people</td></tr>
+          </tbody>
+        </table>
+        <div class="actions"><button class="btn primary" data-toast="Request sent. Your Learnlight account manager will contact you.">Request proposal</button><button class="btn" data-toast="Report exported (demo)">Export report</button></div>
+      </div>
+    </div>
+    <p class="note">🔒 Aggregated and anonymous. Based on calendar metadata only. Groups under 10 people are never shown.</p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const MEETINGS = [
+  { id: "jp", d: "MON", n: 16, time: "10:00", title: "Q1 pricing negotiation", company: "Nakamura Logistics", people: "Kenji Watanabe, Haruka Sato", country: "Japan", city: "Tokyo",
+    insight: "Decisions are usually built by consensus before and after the meeting. Don't expect a final yes on the call.",
+    dos: ["Send the agenda and a pricing summary two days before", "Address the most senior person first", "Leave silence after your proposal: it usually means they are thinking", "Confirm next steps in writing after the call"],
+    avoid: ["Pushing for an immediate decision", "Reading \"we will consider it\" as a yes", "Openly disagreeing with someone in front of their team"],
+    dims: [["Direct", "Indirect", 80], ["Flat hierarchy", "Strong hierarchy", 75], ["Individual decisions", "Consensus", 85], ["Flexible time", "Strict punctuality", 90]],
+    phrases: ["Would it help if we shared a summary before your internal discussion?", "What would you need from us to move this forward?", "Please take the time you need to review this with your team."],
+    lang: "Speak slowly and avoid idioms like \"ballpark figure\" or \"touch base\"." },
+  { id: "de", d: "TUE", n: 17, time: "15:30", title: "Project kickoff", company: "Brenner Automotive", people: "Lukas Becker, Anna Schmidt", country: "Germany", city: "Munich",
+    insight: "Expect direct questions and a detailed review of your plan. That is a sign of engagement, not distrust.",
+    dos: ["Bring a clear structure, data and a timeline", "Be precise about scope and responsibilities", "Use surnames until you are invited to use first names", "Finish at the agreed time"],
+    avoid: ["Overselling or vague promises", "Long small talk before the agenda", "Changing what was agreed without explaining why"],
+    dims: [["Direct", "Indirect", 20], ["Flat hierarchy", "Strong hierarchy", 50], ["Individual decisions", "Consensus", 60], ["Flexible time", "Strict punctuality", 95]],
+    phrases: ["Here is the plan in three phases, with owners and dates.", "Which risks do you see that we have not covered?", "Let me confirm exactly what we agreed."],
+    lang: "Precise numbers and dates build credibility. \"Around spring\" sounds unprepared." },
+  { id: "in", d: "WED", n: 18, time: "11:00", title: "Quarterly business review", company: "Veda Systems", people: "Priya Raman, Arjun Mehta", country: "India", city: "Bangalore",
+    insight: "Relationship and respect for seniority matter. A \"yes\" can mean \"I hear you\", so check commitments with open questions.",
+    dos: ["Start with some personal conversation", "Acknowledge senior stakeholders explicitly", "Use open questions to confirm deadlines", "Be patient with timing, but stay punctual yourself"],
+    avoid: ["Yes or no questions to confirm commitments", "Criticizing the team in front of their manager", "Very blunt written feedback"],
+    dims: [["Direct", "Indirect", 65], ["Flat hierarchy", "Strong hierarchy", 80], ["Individual decisions", "Consensus", 45], ["Flexible time", "Strict punctuality", 40]],
+    phrases: ["How confident do you feel about the March date?", "What could get in the way of this?", "It would be great to hear your team's view on this."],
+    lang: "Indian English has its own expressions. \"Do the needful\" or \"prepone\" are normal, not errors." },
+  { id: "us", d: "THU", n: 19, time: "17:00", title: "Partnership call", company: "Lakeshore Health", people: "Emily Carter", country: "United States", city: "Chicago",
+    insight: "Get to the point quickly and show energy. The call should end with clear owners and dates.",
+    dos: ["Open with the goal of the call", "Share clear numbers and outcomes", "Use first names from the start", "Recap owners and next steps before you hang up"],
+    avoid: ["Long context before the main point", "Too much modesty about your results", "Ending without next steps"],
+    dims: [["Direct", "Indirect", 25], ["Flat hierarchy", "Strong hierarchy", 30], ["Individual decisions", "Consensus", 30], ["Flexible time", "Strict punctuality", 85]],
+    phrases: ["The goal for today is to agree on the pilot scope.", "Here is what we can deliver by Q2.", "So, to recap: you will share the user list, and we will send the plan by Monday."],
+    lang: "Positive language is the norm. \"It's fine\" can sound negative; \"That works great\" sounds neutral." },
+  { id: "br", d: "FRI", n: 20, time: "09:30", title: "Contract renewal", company: "Atlântica Energia", people: "Ana Souza", country: "Brazil", city: "São Paulo",
+    insight: "Trust is personal. Time spent on the relationship is part of the business, not a delay.",
+    dos: ["Allow time for warm conversation at the start", "Show interest in the person and the team", "Be relaxed if the meeting starts a few minutes late", "Follow up with a call, not only email"],
+    avoid: ["Going straight to the contract", "A cold or very formal tone", "A rigid agenda with no room for conversation"],
+    dims: [["Direct", "Indirect", 60], ["Flat hierarchy", "Strong hierarchy", 65], ["Individual decisions", "Consensus", 55], ["Flexible time", "Strict punctuality", 35]],
+    phrases: ["How has the team been since we last spoke?", "We really value working with you.", "Shall we look at the renewal together?"],
+    lang: "A few words in Portuguese, like \"Tudo bem?\", are always appreciated." }
+];
+
+const EMAILS = {
+  jp: { draft: "Hi Kenji,\n\nFollowing our call, we need your decision on the new pricing by Friday. Our offer is already very competitive and we can't wait any longer, otherwise we will have to release the reserved trainers.\n\nLet me know ASAP.\n\nThanks,\nAlex",
+    scores: [80, 35, 30],
+    issues: [["we need your decision on the new pricing by Friday", "A hard deadline can feel like pressure. In Japan, decisions often need internal consensus, so offer support for that process."],
+             ["we can't wait any longer", "This can sound like a threat and put the relationship at risk."],
+             ["ASAP", "Abbreviations feel informal and abrupt in a business relationship that is still developing."],
+             ["Hi Kenji", "With a new senior contact, surname plus \"san\" shows respect."]],
+    rewrite: "Dear Watanabe-san,\n\nThank you very much for your time on Monday's call.\n\nTo support your internal review, I have attached a short summary of the new pricing and the main benefits for Nakamura Logistics.\n\nTo keep the trainers reserved for your team, it would be very helpful to know your direction by Friday 20 November. If your team needs more time or more information, please let me know and we will be happy to adapt.\n\nKind regards,\nAlex" },
+  de: { draft: "Hi Lukas!!\n\nSuper excited to kick things off with you guys! I think the project will go amazingly well and we'll probably have most things ready around spring, more or less. Let's just see how it goes and adjust on the way :)\n\nCheers,\nAlex",
+    scores: [30, 40, 60],
+    issues: [["around spring, more or less", "Vague dates reduce credibility. Give concrete dates for each phase."],
+             ["Let's just see how it goes", "Sounds unplanned. Your contact will expect a structured plan."],
+             ["Super excited", "Strong enthusiasm without data can sound like overselling."],
+             ["you guys", "Too informal for a first project with this client."]],
+    rewrite: "Dear Mr. Becker,\n\nThank you for the kickoff meeting on Tuesday.\n\nAs agreed, here is the plan:\n• Phase 1, needs analysis: 11 to 22 January\n• Phase 2, pilot with 20 participants: 1 February to 12 March\n• Phase 3, rollout: from 22 March\n\nI will send the detailed scope and responsibilities by Thursday. Please let me know if you see any risks we have not covered.\n\nBest regards,\nAlex" },
+  br: { draft: "Ana,\n\nAttached is the renewal contract. Please sign and return by the 30th.\n\nRegards,\nAlex",
+    scores: [85, 30, 25],
+    issues: [["Ana,", "No greeting or personal touch. In Brazil this can feel cold, especially with a long term client."],
+             ["Please sign and return by the 30th", "Sounds like an order. Invite a conversation instead."],
+             ["Attached is the renewal contract", "Pure transaction. Mention the value of the relationship and what is new."]],
+    rewrite: "Hi Ana,\n\nI hope you and the team are doing well, and congratulations again on the launch of the new leadership program!\n\nIt has been a great year working together. I am attaching the renewal proposal, which includes the new Portuguese and English tracks we discussed.\n\nWould you have 20 minutes next week to go through it together? I would love to hear your thoughts before you share it internally.\n\nUm abraço,\nAlex" }
+};
+
+const BARS = [["Germany", 31], ["Japan", 17], ["India", 15], ["United States", 14], ["France", 9], ["Brazil", 8], ["Other", 6]];
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600);
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-toast]"); if (b) toast(b.dataset.toast); });
+
+// Tabs
+document.querySelectorAll("#nav button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#nav button").forEach((x) => x.classList.toggle("active", x === b));
+  document.querySelectorAll("main > section").forEach((s) => s.classList.toggle("hidden", s.id !== "tab-" + b.dataset.tab));
+}));
+
+// Meetings
+function renderMeetings(activeId) {
+  $("#meetings").innerHTML = MEETINGS.map((m) => `
+    <button class="meeting ${m.id === activeId ? "active" : ""}" data-id="${m.id}">
+      <div class="day"><small>${m.d}</small><b>${m.n}</b></div>
+      <div><div class="m-title">${m.title}</div><div class="m-meta">${m.time} · ${m.company}</div><div class="flag">${m.country}</div></div>
+    </button>`).join("");
+  document.querySelectorAll(".meeting").forEach((b) => b.addEventListener("click", () => showBriefing(b.dataset.id)));
+}
+
+function showBriefing(id) {
+  const m = MEETINGS.find((x) => x.id === id);
+  renderMeetings(id);
+  const box = $("#briefing");
+  box.innerHTML = `<span class="ai-tag">Coach is preparing your briefing…</span><div class="shimmer" style="margin-top:14px"><div style="width:70%"></div><div></div><div style="width:85%"></div><div style="width:60%"></div><div></div></div>`;
+  setTimeout(() => {
+    box.innerHTML = `
+      <span class="ai-tag">Cultural briefing · 1 min read</span>
+      <h2 style="margin-top:6px">${m.title}</h2>
+      <div class="m-meta">${m.d} ${m.n} Nov · ${m.time} · ${m.company}, ${m.city} · ${m.people}</div>
+      <div class="insight">💡 ${m.insight}</div>
+      <div class="two">
+        <div><h3>Do</h3><ul class="list do">${m.dos.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div><h3>Avoid</h3><ul class="list avoid">${m.avoid.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      </div>
+      <h3 style="margin-top:18px">Communication style in ${m.country}</h3>
+      <div class="dims">${m.dims.map(([l, r, v]) => `
+        <div><div class="dim-labels"><span>${l}</span><span>${r}</span></div><div class="track"><div class="dot" style="left:${v}%"></div></div></div>`).join("")}
+      </div>
+      <h3>Phrases that help</h3>
+      ${m.phrases.map((p) => `<div class="phrase">"${esc(p)}"</div>`).join("")}
+      <p class="note" style="margin-top:10px"><b>Language tip:</b> ${esc(m.lang)}</p>
+      <div class="actions">
+        <button class="btn primary" data-toast="Added to your next session with Claire">Practice with my trainer</button>
+        <button class="btn" data-toast="Opening the 5 minute lesson in the Learnlight platform (demo)">5 min lesson on ${m.country}</button>
+      </div>
+      <div class="source">ℹ️ Based on the meeting invite only (attendees, location, subject). No email or chat content was read. Cultures are tendencies, not rules: every person is different.</div>`;
+  }, 750);
+}
+
+// Email coach
+function loadDraft() { $("#draft").value = EMAILS[$("#sample").value].draft; $("#emailResult").innerHTML = `<p class="sub" style="margin:0">Your review will appear here.</p>`; }
+$("#sample").addEventListener("change", loadDraft);
+$("#review").addEventListener("click", () => {
+  const key = $("#sample").value, e = EMAILS[key], m = MEETINGS.find((x) => x.id === key);
+  const edited = $("#draft").value.trim() !== e.draft.trim();
+  const box = $("#emailResult");
+  box.innerHTML = `<span class="ai-tag">Coach is reviewing your email for ${m.country}…</span><div class="shimmer" style="margin-top:14px"><div style="width:60%"></div><div></div><div style="width:80%"></div><div></div></div>`;
+  setTimeout(() => {
+    const col = (v) => (v >= 70 ? "var(--good)" : v >= 50 ? "var(--warn)" : "var(--bad)");
+    const labels = ["Clarity", "Cultural tone fit", "Relationship"];
+    box.innerHTML = `
+      <span class="ai-tag">Review for ${m.country}</span>
+      <div class="scores" style="margin-top:12px">${e.scores.map((v, i) => `<div class="score"><b style="color:${col(v)}">${v}</b><small>${labels[i]}</small></div>`).join("")}</div>
+      <h3>What to change</h3>
+      ${e.issues.map(([q, p]) => `<div class="issue"><q>${esc(q)}</q><p>${esc(p)}</p></div>`).join("")}
+      <h3 style="margin-top:16px">Suggested version</h3>
+      <div class="rewrite">${esc(e.rewrite)}</div>
+      <div class="actions"><button class="btn primary" id="useIt">Use this version</button><button class="btn" data-toast="Saved to your practice log for Claire">Save to practice log</button></div>
+      ${edited ? `<p class="note">Demo mode: you edited the draft, but this review is pre-written for the sample. In the pilot, the AI reviews your exact text.</p>` : ""}`;
+    $("#useIt").addEventListener("click", () => { $("#draft").value = e.rewrite; toast("Draft updated"); });
+  }, 1100);
+});
+
+// Team bars
+$("#bars").innerHTML = BARS.map(([c, v]) => `<div class="bar-row"><span>${c}</span><div class="bar"><span style="width:${(v / 31) * 100}%"></span></div><b>${v}%</b></div>`).join("");
+
+// Init
+renderMeetings("jp"); showBriefing("jp"); loadDraft();
+
+// Theme: Teams context if available, otherwise system preference
+function setTheme(t) { document.body.classList.toggle("dark", t === "dark" || t === "contrast"); }
+if (window.matchMedia) setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default");
+try {
+  if (window.microsoftTeams && microsoftTeams.app) {
+    microsoftTeams.app.initialize().then(() => microsoftTeams.app.getContext()).then((ctx) => {
+      setTheme(ctx.app && ctx.app.theme);
+      microsoftTeams.app.registerOnThemeChangeHandler(setTheme);
+    }).catch(() => {});
+  }
+} catch (e) {}
+</script>
+</body>
+</html>
