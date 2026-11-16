@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learnlight PRO (demo)</title>
+<script src="https://res.cdn.office.net/teams-js/2.19.0/js/MicrosoftTeams.min.js" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #f4f6f7; --surface: #ffffff; --surface-2: #eef1f2; --border: #e0e5e7;
+    --text: #1c1d1a; --muted: #6b6c69; --brand: #02a5e3; --brand-strong: #0283b5; --brand-soft: #e5f6fc; --brand-ink: #ffffff;
+    --accent: #f6c833; --accent-soft: #fdf3d2; --good: #1e8a4c; --good-soft: #e3f4ea; --warn: #a8740f; --bad: #c0392b;
+    --shadow: 0 1px 2px rgba(20,30,40,.05), 0 4px 14px rgba(20,30,40,.05); --radius: 14px;
+  }
+  body.dark {
+    --bg: #1c1d1f; --surface: #26282b; --surface-2: #303236; --border: #3b3e42;
+    --text: #ececea; --muted: #a7a8a5; --brand: #3cc0f0; --brand-strong: #3cc0f0; --brand-soft: #16323d; --brand-ink: #0b1a20;
+    --accent-soft: #3a3320; --good-soft: #1d3326; --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.45; }
+  button { font: inherit; cursor: pointer; }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .wordmark { height: 22px; width: auto; color: var(--brand); display: block; }
+  .pro { font-weight: 800; font-size: 13px; letter-spacing: .08em; color: #1c1d1a; background: var(--accent); padding: 2px 7px; border-radius: 5px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); }
+  .right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .seg { display: flex; background: var(--surface-2); border-radius: 8px; padding: 3px; }
+  .seg button { border: 0; background: none; padding: 5px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+  .icon-btn { white-space: nowrap; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 600; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #1c1d1a; display: grid; place-items: center; font-weight: 700; font-size: 13px; flex: none; }
+  nav { display: flex; gap: 4px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; padding: 12px 14px; color: var(--muted); font-weight: 600; border-bottom: 3px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--brand-strong); border-bottom-color: var(--brand); }
+  main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+  h2 { font-size: 18px; margin: 0 0 4px; }
+  h3 { font-size: 15px; margin: 0 0 10px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .m-meta { color: var(--muted); font-size: 12.5px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .grid-2 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items: start; }
+  .grid-2b { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 880px) { .grid-2, .grid-2b { grid-template-columns: 1fr; } .who { display: none; } }
+  .stack { display: grid; gap: 16px; }
+  .btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: 8px; font-weight: 600; }
+  .btn.primary { background: var(--brand-strong); color: var(--brand-ink); border-color: var(--brand-strong); }
+  .btn.ghost { border-color: transparent; color: var(--brand-strong); padding-left: 6px; padding-right: 6px; }
+  .btn.small { padding: 5px 10px; font-size: 12.5px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .hidden { display: none !important; }
+  /* scenario chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 99px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; }
+  .chip.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-strong); }
+  /* compose */
+  .compose .row { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding: 8px 0; font-size: 13px; }
+  .compose .row span:first-child { color: var(--muted); width: 56px; flex: none; }
+  .compose textarea { width: 100%; min-height: 230px; border: 0; resize: vertical; font: inherit; font-size: 14px; color: var(--text); background: transparent; padding: 12px 0; outline: none; line-height: 1.55; }
+  .readview { white-space: pre-wrap; padding: 12px 0; min-height: 230px; line-height: 1.55; }
+  mark { background: var(--accent-soft); border-bottom: 2px solid var(--accent); color: inherit; padding: 0 2px; border-radius: 3px; }
+  mark.done { background: var(--good-soft); border-bottom-color: var(--good); }
+  mark sup, .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--accent); color: #1c1d1a; font-size: 10.5px; font-weight: 800; margin-left: 3px; vertical-align: 2px; }
+  .num.done { background: var(--good); color: #fff; }
+  /* stepper */
+  .stepper { display: flex; gap: 4px; margin-bottom: 14px; }
+  .stepper div { flex: 1; text-align: center; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); padding-top: 6px; border-top: 3px solid var(--surface-2); }
+  .stepper div.on { color: var(--brand-strong); border-top-color: var(--brand); }
+  .stepper div.past { color: var(--text); border-top-color: var(--brand-soft); }
+  .ctx { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 12px; }
+  .ctx div { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; }
+  .ctx small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .ctx b { font-size: 13px; }
+  .think { background: var(--brand-soft); border-left: 4px solid var(--brand); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+  .think b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--brand-strong); margin-bottom: 2px; }
+  .q { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .q.done { border-color: var(--good); background: var(--good-soft); }
+  .q .area { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .q p { margin: 4px 0 0; }
+  .q .help { margin-top: 8px; font-size: 13px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); }
+  .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 14px; }
+  .meter small { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .bar { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .bar span { display: block; height: 100%; background: var(--brand); border-radius: 99px; transition: width .6s ease; }
+  .bar.y span { background: var(--accent); }
+  .tip { border: 1px dashed var(--brand); border-radius: 10px; padding: 12px; margin-top: 12px; }
+  .tip b { color: var(--brand-strong); }
+  .rewrite { white-space: pre-wrap; background: var(--surface-2); padding: 12px; border-radius: 8px; font-size: 13.5px; margin-top: 8px; }
+  /* growth */
+  .area-row { display: grid; grid-template-columns: 1fr 120px 110px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .area-row:last-child { border-bottom: 0; }
+  .stage { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); text-align: center; }
+  .stage.s5 { background: var(--good-soft); color: var(--good); }
+  .stage.s4 { background: var(--brand-soft); color: var(--brand-strong); }
+  .stage.s3 { background: var(--accent-soft); color: var(--warn); }
+  .playbook li { margin-bottom: 8px; }
+  .share label.opt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; }
+  .share input[type=checkbox] { accent-color: var(--brand-strong); width: 17px; height: 17px; margin-top: 2px; flex: none; }
+  .share textarea { width: 100%; min-height: 64px; font: inherit; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+  .brief { border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; background: var(--surface); }
+  .brief h4 { margin: 18px 0 6px; font-size: 12px; color: var(--brand-strong); text-transform: uppercase; letter-spacing: .05em; }
+  .brief ul { margin: 0; padding-left: 18px; }
+  .brief li { margin-bottom: 4px; }
+  .brief li::marker { color: var(--accent); }
+  .ex { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  @media (max-width: 700px) { .ex { grid-template-columns: 1fr; } }
+  .ex div { background: var(--surface-2); border-radius: 8px; padding: 10px; font-size: 12.5px; white-space: pre-wrap; }
+  .ex b { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; white-space: normal; }
+  .pcc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+  @media (max-width: 700px) { .pcc { grid-template-columns: 1fr; } }
+  .pcc div { border: 1px solid var(--border); border-radius: 10px; padding: 10px; font-size: 13px; }
+  .pcc b { display: block; color: var(--brand-strong); }
+  .sent { display: flex; gap: 10px; align-items: center; background: var(--good-soft); color: var(--good); font-weight: 600; padding: 10px 12px; border-radius: 8px; margin-top: 12px; }
+  .trainer { display: flex; gap: 12px; align-items: center; }
+  .trainer .avatar { width: 44px; height: 44px; background: var(--brand); color: #fff; }
+  /* insights */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi b { font-size: 24px; display: block; }
+  .kpi small { color: var(--muted); }
+  .reg { display: grid; grid-template-columns: 96px 1fr 52px 56px; gap: 10px; align-items: center; margin-bottom: 9px; font-size: 13px; }
+  .up { color: var(--good); font-weight: 700; font-size: 12px; text-align: right; }
+  .down { color: var(--bad); font-weight: 700; font-size: 12px; text-align: right; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .line { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; color: #fff; }
+  .l-ict { background: #3e4a55; } .l-ips { background: var(--accent); color: #1c1d1a; }
+  .conf { white-space: nowrap; display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .c-high { background: var(--good-soft); color: var(--good); } .c-med { background: var(--accent-soft); color: var(--warn); }
+  .lock { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: #3e4a55; color: #fff; }
+  /* overlay + toast */
+  .overlay { position: fixed; inset: 0; background: rgba(15,18,30,.55); display: grid; place-items: center; z-index: 20; padding: 16px; }
+  .modal { background: var(--surface); color: var(--text); border-radius: 16px; max-width: 580px; width: 100%; padding: 26px; max-height: 92vh; overflow: auto; }
+  .perm { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .perm .ic { font-size: 18px; width: 24px; text-align: center; }
+  .perm small { color: var(--muted); display: block; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(90px); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-weight: 600; transition: transform .25s ease; z-index: 30; max-width: 90vw; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg class="wordmark" aria-label="learnlight" role="img" viewBox="0 0 365 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" overflow="hidden"><path d="M1.60333 61.2698C0.320666 57.4605 0 53.6506 0 49.5235L0 0.317749 11.2256 0.317749 11.2256 43.8097C10.9049 49.5235 11.5463 54.9203 13.1496 60.6349L1.60333 61.2698Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M40.7333 61.9048C37.8465 61.9048 34.9598 61.587 32.3937 60.3172 29.8284 59.3653 27.2623 57.46 25.3383 55.5553 21.4888 51.1113 19.5648 45.3967 19.8854 39.6828 19.5648 33.9683 21.4888 28.2537 25.3383 23.8096 27.2623 21.5872 29.8284 20.0004 32.3937 19.0477 34.9598 18.0958 37.8465 17.4601 40.7333 17.4601 47.1481 17.4601 52.2803 19.6826 55.8077 24.1274 59.0158 28.2537 60.6192 34.6031 60.6192 42.2223L30.4697 42.2223C31.111 49.2066 34.9598 53.3337 40.7333 53.3337 44.9027 53.3337 47.7895 51.4283 49.7142 47.3013L59.6572 49.8415C58.0531 53.3337 55.8077 56.1902 52.601 58.4126 49.3928 60.9521 45.2241 61.9048 40.7333 61.9048ZM40.7333 25.7142C35.2812 25.7142 31.7531 29.2064 30.7904 35.5558L50.0349 35.5558C49.3928 29.5242 45.8647 25.7142 40.7333 25.7142Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M79.8633 61.9046C76.0146 62.2224 72.4865 60.952 69.5997 58.7303 68.3171 57.7776 67.0336 56.1908 66.3923 54.6033 65.751 53.0157 65.4303 51.4282 65.4303 49.5235 65.4303 47.6189 65.751 45.7143 66.713 43.8097 67.675 42.2222 68.9584 40.6346 70.5617 39.6827 74.7319 37.1432 79.5427 35.8727 84.3542 36.1905 87.2402 36.1905 90.1269 36.1905 93.0137 36.5076L93.0137 34.9208C93.0137 29.524 90.1269 26.3489 84.9955 26.3489 83.3914 26.3489 81.7881 26.6667 80.184 27.3016 78.5807 27.9365 77.6179 29.2062 76.6559 30.4759L67.9964 25.714C69.5997 22.8575 71.8451 20.9521 74.7319 19.3653 78.26 17.7778 82.1087 16.8259 85.9575 16.8259 91.731 16.8259 96.2211 18.4127 99.1079 21.27 102.315 24.4443 103.919 29.2062 103.919 35.5557L103.919 46.9841C103.919 51.4282 104.56 55.873 105.843 60L95.5798 60.952C94.9377 58.7303 94.6178 56.5079 94.2971 54.6033 92.693 56.8257 90.769 58.7303 88.5228 60 85.3162 61.2698 82.7501 61.9046 79.8633 61.9046ZM84.9955 43.1748C79.5427 43.1748 76.0146 45.3965 76.0146 48.8887 76.0146 52.3808 78.26 54.6033 82.4294 54.6033 84.6748 54.6033 86.9195 53.9684 88.5228 52.6986 90.4476 51.4282 91.731 49.5235 92.3723 47.6189 92.693 46.3492 92.693 45.0795 93.0137 43.8097 90.1269 43.1748 87.5608 43.1748 84.9955 43.1748Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M115.465 60.9524 115.465 18.4131 124.767 18.4131 124.767 27.302C126.691 21.5874 130.541 17.4604 136.955 17.4604 138.559 17.4604 140.162 17.7774 141.766 18.0953L139.842 28.5717C138.559 28.2539 137.276 27.9369 135.993 27.9369 131.503 27.9369 128.295 31.1112 127.333 35.5553 126.691 38.0955 126.691 40.635 126.691 43.1745L126.691 60.9524 115.465 60.9524Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M149.144 60.9523 149.144 18.413 158.445 18.413 158.445 26.3493C159.727 23.492 161.651 21.2703 164.218 19.6828 166.784 18.0952 169.67 17.1433 172.877 17.1433 181.859 17.1433 186.99 22.8571 186.99 33.3336L186.99 60.3175 176.086 60.3175 176.086 35.8731C176.086 29.5236 173.84 26.9842 169.67 26.9842 164.218 26.9842 161.331 30.7934 160.689 34.9204 160.37 36.825 160.37 38.7304 160.37 40.9521L160.37 60.6345 149.144 60.9523Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M200.782 61.2698C199.5 57.4605 199.179 53.6506 199.179 49.5235L199.179 0.317749 210.404 0.317749 210.404 43.8097C210.083 49.5235 210.726 54.9203 212.329 60.6349L200.782 61.2698Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M222.592 60.9528 233.818 60.9528 233.818 18.4135 222.592 18.4135 222.592 60.9528Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M261.401 80C254.025 80 248.894 79.0473 245.044 76.8256 243.44 75.873 242.158 74.6032 240.875 73.0157 239.912 71.4289 239.27 69.8413 238.95 67.9367L249.534 65.7143C249.534 66.667 249.856 67.6189 250.496 68.5716 251.137 69.5235 251.779 70.1584 252.742 70.4762 255.307 71.7459 258.516 72.3808 261.401 72.0637 269.1 72.0637 272.628 68.8886 272.628 66.0314 272.628 63.1748 270.382 61.9051 266.213 61.9051L253.704 61.9051C251.137 62.2221 248.572 61.2702 246.327 59.6827 245.365 59.0478 244.724 58.0951 244.403 56.8254 244.081 55.8727 243.761 54.6029 243.761 53.651 243.761 51.1108 245.044 48.8891 248.252 45.397L249.213 44.4443C247.289 43.1745 245.685 41.2699 244.724 39.3653 243.761 37.4607 243.118 34.9205 243.118 32.6988 243.118 30.4764 243.44 28.5718 244.403 26.6664 245.365 24.7618 246.647 23.175 248.252 21.9053 252.1 19.048 256.59 17.4604 261.081 17.7782 264.609 17.7782 267.816 18.7302 271.023 20.3177L276.798 13.9683 284.174 19.048 277.438 26.6664C278.722 28.5718 279.364 31.1113 279.684 33.3337 279.684 35.5553 279.364 37.4607 278.401 39.3653 277.438 41.2699 276.155 42.8575 274.551 44.1272 270.703 46.9845 266.213 48.2542 261.722 48.2542 260.44 48.2542 259.156 48.2542 257.553 47.9364L254.987 50.1589C254.025 51.1108 253.704 51.7464 253.704 52.3813 253.704 53.0161 254.346 53.3332 255.307 53.3332L267.495 53.3332C272.948 53.3332 277.117 54.6029 280.004 56.8254 281.288 57.778 282.249 59.0478 282.892 60.6353 283.532 61.9051 283.854 63.4919 283.854 65.0794 283.854 66.984 283.532 69.2065 282.57 71.1111 281.608 73.0157 280.326 74.6032 278.722 75.873 276.798 77.4605 274.231 78.4124 271.666 79.3651 268.137 79.6822 264.609 80 261.401 80ZM261.081 25.3967C260.119 25.3967 259.156 25.7145 258.194 26.0315 257.232 26.3494 256.27 26.9842 255.628 27.6191 254.987 28.254 254.346 29.2066 254.025 30.1586 253.704 31.1113 253.384 32.0639 253.384 33.0159 253.384 33.9685 253.384 34.9205 254.025 35.8732 254.346 36.8251 254.987 37.7778 255.628 38.4126 256.27 39.0475 257.232 39.6824 258.194 40.0002 259.156 40.3172 260.119 40.6351 261.081 40.6351 262.044 40.6351 263.006 40.3172 263.966 40.0002 264.929 39.6824 265.892 39.0475 266.534 38.4126 267.175 37.7778 267.816 36.8251 268.137 35.8732 268.457 34.9205 268.779 33.9685 268.779 33.0159 268.779 32.0639 268.779 31.1113 268.137 30.1586 267.816 29.2066 267.175 28.254 266.534 27.6191 265.892 26.9842 264.929 26.3494 263.966 26.0315 263.326 25.3967 262.364 25.3967 261.081 25.3967Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M290.268 60.9524 290.268 0.317444 301.493 0.317444 301.493 24.7618C302.777 22.5401 304.702 20.6348 306.947 19.365 309.191 18.0953 311.757 17.4604 314.325 17.4604 323.304 17.4604 328.435 23.175 328.435 33.6507L328.435 60.6346 317.531 60.6346 317.531 36.191C317.531 29.8415 315.285 27.302 311.116 27.302 305.663 27.302 302.777 31.1113 302.136 35.2383 301.815 36.508 301.815 37.4607 301.815 38.7305L301.815 60.6346 290.268 60.9524Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M353.133 27.6191 353.133 46.9838C353.133 50.7938 355.378 53.0162 358.906 53.0162 360.509 53.0162 362.434 52.6984 364.037 52.0635L365 60.9524C362.114 61.5873 359.227 61.9051 356.34 61.9051 346.397 61.9051 342.227 56.5083 342.227 45.397L342.227 27.3021 335.172 27.3021 335.172 18.4131 342.227 18.4131 342.227 7.93665 353.454 5.71423 353.454 18.4131 364.359 18.4131 364.359 27.3021 353.133 27.3021 353.133 27.6191Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M235.421 6.98432C235.421 7.937 235.102 8.88893 234.78 9.5238 234.459 10.4765 233.818 11.1114 233.177 11.7462 232.536 12.3811 231.573 13.016 230.931 13.3338 229.97 13.6508 229.007 13.9686 228.365 13.9686 226.442 13.9686 224.516 13.3338 223.233 12.0633 221.951 10.7935 220.988 8.88893 220.988 6.98432 220.988 5.07971 221.63 3.49216 223.233 1.90461 224.516 0.63487 226.442 0 228.365 0 229.327 0 230.29 0.317812 230.931 0.63487 231.893 0.952682 232.536 1.58755 233.177 2.22242 233.818 2.85729 234.459 3.49216 234.78 4.44484 235.102 5.07971 235.421 6.03164 235.421 6.98432Z" fill="#F6CA33" fill-rule="evenodd" clip-rule="evenodd"/></svg><span class="pro">PRO</span><span class="badge">Demo</span></div>
+  <div class="right">
+    <div class="seg" id="viewSeg"><button data-view="learner" class="on">Learner view</button><button data-view="ll">Learnlight view</button></div>
+    <button class="icon-btn" id="openPrivacy">🔒 Privacy</button>
+    <span class="who m-meta">Alex Morgan · Orion Freight Group</span><div class="avatar">AM</div>
+  </div>
+</header>
+<nav id="nav">
+  <button data-tab="coach" class="active">Email coach</button>
+  <button data-tab="growth">My growth</button>
+</nav>
+
+<main>
+  <!-- EMAIL COACH -->
+  <section id="tab-coach">
+    <h2>Email coach</h2>
+    <p class="sub">Coach reads the context of your email and helps you find what to adapt. You make the changes; Coach helps when you need it.</p>
+    <div class="chips" id="scenarios"></div>
+    <div class="grid-2">
+      <div class="card compose">
+        <div class="row"><span>To</span><b id="cTo"></b></div>
+        <div class="row"><span>Subject</span><span id="cSubj" style="width:auto;color:var(--text)"></span></div>
+        <textarea id="draft" spellcheck="false"></textarea>
+        <div id="readview" class="readview hidden"></div>
+        <div class="actions" style="border-top:1px solid var(--border);padding-top:12px;margin-top:0">
+          <button class="btn primary" id="reviewBtn">Review my draft</button>
+          <button class="btn hidden" id="editBtn">✏️ Edit my email</button>
+          <button class="btn hidden" id="checkBtn">Check again</button>
+          <button class="btn ghost" id="resetBtn">Reset sample</button>
+        </div>
+      </div>
+      <div class="card" id="pane"></div>
+    </div>
+  </section>
+
+  <!-- MY GROWTH -->
+  <section id="tab-growth" class="hidden">
+    <h2>My growth</h2>
+    <p class="sub">Patterns Coach has seen in your last 30 days of emails, and how you are progressing. Only you can see this page.</p>
+    <div class="grid-2b">
+      <div class="stack">
+        <div class="card">
+          <h3>Your communication areas</h3>
+          <div class="area-row m-meta" style="padding-top:0"><span>Area and where it shows up</span><span>Fixed on your own</span><span style="text-align:center">Stage</span></div>
+          <div id="areas"></div>
+          <p class="note">Stages follow the Learnlight Empowerment Method: Exposure, Discovery, Internalization, Production, Mastery.</p>
+        </div>
+        <div class="card">
+          <h3>Quick recall</h3>
+          <p style="margin:0 0 10px">You are writing to <b>Nakamura Logistics</b> again this week. Last time, what did you change in how you asked for a decision?</p>
+          <button class="btn small" id="recallBtn">Show my answer</button>
+          <div class="help hidden" id="recallAns" style="margin-top:10px;padding:10px;border-radius:8px;background:var(--surface-2)">You replaced the hard deadline with an offer to support Kenji's internal review, and gave a clear date as a reason, not as pressure.</div>
+        </div>
+        <div class="card">
+          <h3>My playbook</h3>
+          <ul class="playbook" id="playbook"></ul>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card share" id="shareCard">
+          <div class="trainer"><div class="avatar">CD</div><div><b>Share with my trainer</b><div class="m-meta">Claire Dubois · next session Thursday 19 Nov, 16:00</div></div></div>
+          <p style="margin:12px 0 4px">Turn your real emails into your next session. Choose what Claire can see:</p>
+          <div id="shareAreas"></div>
+          <label class="opt"><input type="checkbox" id="shareEx" checked><span><b>Include 2 real examples, anonymized</b><br><span class="m-meta">Names, companies and numbers are removed before sharing.</span></span></label>
+          <label class="lbl m-meta" for="goal" style="display:block;margin:8px 0 6px;font-weight:600">What do you want to work on? (optional)</label>
+          <textarea id="goal">I want to sound respectful but still get decisions on time from senior clients in Asia.</textarea>
+          <div class="actions"><button class="btn primary" id="previewBrief">Preview session brief</button></div>
+          <p class="note">You decide what is shared. Your trainer never sees your inbox.</p>
+        </div>
+        <div id="briefWrap" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNLIGHT INSIGHTS -->
+  <section id="tab-ll" class="hidden">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Learnlight Insights</h2><span class="lock">LEARNLIGHT ONLY</span></div>
+    <p class="sub" style="margin-top:6px">Predicted training needs for each client, from aggregated interaction metadata. No names, no email content.</p>
+    <div class="chips" id="clients"></div>
+    <div class="kpis">
+      <div class="card kpi"><b>212 / 260</b><small>active employees</small></div>
+      <div class="card kpi"><b>18.4k</b><small>international interactions a month</small></div>
+      <div class="card kpi"><b>23</b><small>countries they work with</small></div>
+      <div class="card kpi"><b>37</b><small>trainer briefs shared</small></div>
+    </div>
+    <div class="grid-2b" style="grid-template-columns: 1fr 1.5fr">
+      <div class="card">
+        <h3>Who they work with</h3>
+        <p class="m-meta" style="margin:-6px 0 14px">Share of international interactions, and change vs last quarter</p>
+        <div id="regions"></div>
+      </div>
+      <div class="card">
+        <h3>Predicted needs</h3>
+        <table>
+          <thead><tr><th>Need</th><th>Signal</th><th>When</th><th>Suggested offer</th></tr></thead>
+          <tbody id="needs"></tbody>
+        </table>
+        <div class="actions"><button class="btn primary" data-toast="Opportunity created for the Orion Freight account manager (demo)">Create opportunity</button><button class="btn" data-toast="Account brief exported (demo)">Export account brief</button></div>
+      </div>
+    </div>
+    <p class="note">🔒 Aggregated by company and team, minimum 10 people per group, under a data sharing agreement approved by the client. Signals: recipient regions and seniority, interaction frequency, role changes in the directory, and anonymous coaching patterns.</p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<div class="overlay hidden" id="onboard">
+  <div class="modal">
+    <div class="logo" style="margin-bottom:12px"><svg class="wordmark" aria-label="learnlight" role="img" viewBox="0 0 365 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" overflow="hidden"><path d="M1.60333 61.2698C0.320666 57.4605 0 53.6506 0 49.5235L0 0.317749 11.2256 0.317749 11.2256 43.8097C10.9049 49.5235 11.5463 54.9203 13.1496 60.6349L1.60333 61.2698Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M40.7333 61.9048C37.8465 61.9048 34.9598 61.587 32.3937 60.3172 29.8284 59.3653 27.2623 57.46 25.3383 55.5553 21.4888 51.1113 19.5648 45.3967 19.8854 39.6828 19.5648 33.9683 21.4888 28.2537 25.3383 23.8096 27.2623 21.5872 29.8284 20.0004 32.3937 19.0477 34.9598 18.0958 37.8465 17.4601 40.7333 17.4601 47.1481 17.4601 52.2803 19.6826 55.8077 24.1274 59.0158 28.2537 60.6192 34.6031 60.6192 42.2223L30.4697 42.2223C31.111 49.2066 34.9598 53.3337 40.7333 53.3337 44.9027 53.3337 47.7895 51.4283 49.7142 47.3013L59.6572 49.8415C58.0531 53.3337 55.8077 56.1902 52.601 58.4126 49.3928 60.9521 45.2241 61.9048 40.7333 61.9048ZM40.7333 25.7142C35.2812 25.7142 31.7531 29.2064 30.7904 35.5558L50.0349 35.5558C49.3928 29.5242 45.8647 25.7142 40.7333 25.7142Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M79.8633 61.9046C76.0146 62.2224 72.4865 60.952 69.5997 58.7303 68.3171 57.7776 67.0336 56.1908 66.3923 54.6033 65.751 53.0157 65.4303 51.4282 65.4303 49.5235 65.4303 47.6189 65.751 45.7143 66.713 43.8097 67.675 42.2222 68.9584 40.6346 70.5617 39.6827 74.7319 37.1432 79.5427 35.8727 84.3542 36.1905 87.2402 36.1905 90.1269 36.1905 93.0137 36.5076L93.0137 34.9208C93.0137 29.524 90.1269 26.3489 84.9955 26.3489 83.3914 26.3489 81.7881 26.6667 80.184 27.3016 78.5807 27.9365 77.6179 29.2062 76.6559 30.4759L67.9964 25.714C69.5997 22.8575 71.8451 20.9521 74.7319 19.3653 78.26 17.7778 82.1087 16.8259 85.9575 16.8259 91.731 16.8259 96.2211 18.4127 99.1079 21.27 102.315 24.4443 103.919 29.2062 103.919 35.5557L103.919 46.9841C103.919 51.4282 104.56 55.873 105.843 60L95.5798 60.952C94.9377 58.7303 94.6178 56.5079 94.2971 54.6033 92.693 56.8257 90.769 58.7303 88.5228 60 85.3162 61.2698 82.7501 61.9046 79.8633 61.9046ZM84.9955 43.1748C79.5427 43.1748 76.0146 45.3965 76.0146 48.8887 76.0146 52.3808 78.26 54.6033 82.4294 54.6033 84.6748 54.6033 86.9195 53.9684 88.5228 52.6986 90.4476 51.4282 91.731 49.5235 92.3723 47.6189 92.693 46.3492 92.693 45.0795 93.0137 43.8097 90.1269 43.1748 87.5608 43.1748 84.9955 43.1748Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M115.465 60.9524 115.465 18.4131 124.767 18.4131 124.767 27.302C126.691 21.5874 130.541 17.4604 136.955 17.4604 138.559 17.4604 140.162 17.7774 141.766 18.0953L139.842 28.5717C138.559 28.2539 137.276 27.9369 135.993 27.9369 131.503 27.9369 128.295 31.1112 127.333 35.5553 126.691 38.0955 126.691 40.635 126.691 43.1745L126.691 60.9524 115.465 60.9524Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M149.144 60.9523 149.144 18.413 158.445 18.413 158.445 26.3493C159.727 23.492 161.651 21.2703 164.218 19.6828 166.784 18.0952 169.67 17.1433 172.877 17.1433 181.859 17.1433 186.99 22.8571 186.99 33.3336L186.99 60.3175 176.086 60.3175 176.086 35.8731C176.086 29.5236 173.84 26.9842 169.67 26.9842 164.218 26.9842 161.331 30.7934 160.689 34.9204 160.37 36.825 160.37 38.7304 160.37 40.9521L160.37 60.6345 149.144 60.9523Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M200.782 61.2698C199.5 57.4605 199.179 53.6506 199.179 49.5235L199.179 0.317749 210.404 0.317749 210.404 43.8097C210.083 49.5235 210.726 54.9203 212.329 60.6349L200.782 61.2698Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M222.592 60.9528 233.818 60.9528 233.818 18.4135 222.592 18.4135 222.592 60.9528Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M261.401 80C254.025 80 248.894 79.0473 245.044 76.8256 243.44 75.873 242.158 74.6032 240.875 73.0157 239.912 71.4289 239.27 69.8413 238.95 67.9367L249.534 65.7143C249.534 66.667 249.856 67.6189 250.496 68.5716 251.137 69.5235 251.779 70.1584 252.742 70.4762 255.307 71.7459 258.516 72.3808 261.401 72.0637 269.1 72.0637 272.628 68.8886 272.628 66.0314 272.628 63.1748 270.382 61.9051 266.213 61.9051L253.704 61.9051C251.137 62.2221 248.572 61.2702 246.327 59.6827 245.365 59.0478 244.724 58.0951 244.403 56.8254 244.081 55.8727 243.761 54.6029 243.761 53.651 243.761 51.1108 245.044 48.8891 248.252 45.397L249.213 44.4443C247.289 43.1745 245.685 41.2699 244.724 39.3653 243.761 37.4607 243.118 34.9205 243.118 32.6988 243.118 30.4764 243.44 28.5718 244.403 26.6664 245.365 24.7618 246.647 23.175 248.252 21.9053 252.1 19.048 256.59 17.4604 261.081 17.7782 264.609 17.7782 267.816 18.7302 271.023 20.3177L276.798 13.9683 284.174 19.048 277.438 26.6664C278.722 28.5718 279.364 31.1113 279.684 33.3337 279.684 35.5553 279.364 37.4607 278.401 39.3653 277.438 41.2699 276.155 42.8575 274.551 44.1272 270.703 46.9845 266.213 48.2542 261.722 48.2542 260.44 48.2542 259.156 48.2542 257.553 47.9364L254.987 50.1589C254.025 51.1108 253.704 51.7464 253.704 52.3813 253.704 53.0161 254.346 53.3332 255.307 53.3332L267.495 53.3332C272.948 53.3332 277.117 54.6029 280.004 56.8254 281.288 57.778 282.249 59.0478 282.892 60.6353 283.532 61.9051 283.854 63.4919 283.854 65.0794 283.854 66.984 283.532 69.2065 282.57 71.1111 281.608 73.0157 280.326 74.6032 278.722 75.873 276.798 77.4605 274.231 78.4124 271.666 79.3651 268.137 79.6822 264.609 80 261.401 80ZM261.081 25.3967C260.119 25.3967 259.156 25.7145 258.194 26.0315 257.232 26.3494 256.27 26.9842 255.628 27.6191 254.987 28.254 254.346 29.2066 254.025 30.1586 253.704 31.1113 253.384 32.0639 253.384 33.0159 253.384 33.9685 253.384 34.9205 254.025 35.8732 254.346 36.8251 254.987 37.7778 255.628 38.4126 256.27 39.0475 257.232 39.6824 258.194 40.0002 259.156 40.3172 260.119 40.6351 261.081 40.6351 262.044 40.6351 263.006 40.3172 263.966 40.0002 264.929 39.6824 265.892 39.0475 266.534 38.4126 267.175 37.7778 267.816 36.8251 268.137 35.8732 268.457 34.9205 268.779 33.9685 268.779 33.0159 268.779 32.0639 268.779 31.1113 268.137 30.1586 267.816 29.2066 267.175 28.254 266.534 27.6191 265.892 26.9842 264.929 26.3494 263.966 26.0315 263.326 25.3967 262.364 25.3967 261.081 25.3967Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M290.268 60.9524 290.268 0.317444 301.493 0.317444 301.493 24.7618C302.777 22.5401 304.702 20.6348 306.947 19.365 309.191 18.0953 311.757 17.4604 314.325 17.4604 323.304 17.4604 328.435 23.175 328.435 33.6507L328.435 60.6346 317.531 60.6346 317.531 36.191C317.531 29.8415 315.285 27.302 311.116 27.302 305.663 27.302 302.777 31.1113 302.136 35.2383 301.815 36.508 301.815 37.4607 301.815 38.7305L301.815 60.6346 290.268 60.9524Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M353.133 27.6191 353.133 46.9838C353.133 50.7938 355.378 53.0162 358.906 53.0162 360.509 53.0162 362.434 52.6984 364.037 52.0635L365 60.9524C362.114 61.5873 359.227 61.9051 356.34 61.9051 346.397 61.9051 342.227 56.5083 342.227 45.397L342.227 27.3021 335.172 27.3021 335.172 18.4131 342.227 18.4131 342.227 7.93665 353.454 5.71423 353.454 18.4131 364.359 18.4131 364.359 27.3021 353.133 27.3021 353.133 27.6191Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"/><path d="M235.421 6.98432C235.421 7.937 235.102 8.88893 234.78 9.5238 234.459 10.4765 233.818 11.1114 233.177 11.7462 232.536 12.3811 231.573 13.016 230.931 13.3338 229.97 13.6508 229.007 13.9686 228.365 13.9686 226.442 13.9686 224.516 13.3338 223.233 12.0633 221.951 10.7935 220.988 8.88893 220.988 6.98432 220.988 5.07971 221.63 3.49216 223.233 1.90461 224.516 0.63487 226.442 0 228.365 0 229.327 0 230.29 0.317812 230.931 0.63487 231.893 0.952682 232.536 1.58755 233.177 2.22242 233.818 2.85729 234.459 3.49216 234.78 4.44484 235.102 5.07971 235.421 6.03164 235.421 6.98432Z" fill="#F6CA33" fill-rule="evenodd" clip-rule="evenodd"/></svg><span class="pro">PRO</span></div>
+    <h2 style="margin-bottom:6px">Welcome to Learnlight PRO</h2>
+    <p class="sub" style="margin-bottom:6px">Your coach for communicating across cultures, inside Outlook and Teams. Here is exactly what it uses.</p>
+    <div class="perm"><span class="ic">📇</span><div><b>Context from metadata</b><small>Who you write to, their country or office, their role and how often you interact. Never the content of your inbox or chats.</small></div></div>
+    <div class="perm"><span class="ic">✉️</span><div><b>Your draft, only when you ask</b><small>Coach reads a draft only when you click Review.</small></div></div>
+    <div class="perm"><span class="ic">🎓</span><div><b>Your trainer sees what you share</b><small>You choose the areas and examples. Names and companies are removed.</small></div></div>
+    <div class="perm" style="border-bottom:0"><span class="ic">📊</span><div><b>Learnlight sees trends, not people</b><small>Aggregated by company and team, minimum 10 people, to plan relevant training. Data stays in the EU and is never used to train AI models.</small></div></div>
+    <div class="actions" style="justify-content:flex-end"><button class="btn primary" id="startBtn">Start using PRO</button></div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-toast]"); if (b) toast(b.dataset.toast); });
+
+const SCEN = {
+  jp: {
+    chip: "Senior client · Japan", to: "Kenji Watanabe <k.watanabe@nakamura-logistics.co.jp>", subj: "New pricing proposal",
+    ctx: [["Reader", "Kenji Watanabe, Head of Procurement"], ["Region", "Japan · Tokyo office"], ["Level", "Senior, two levels above you"], ["Relationship", "Client · 4 months · 23 threads"]],
+    purpose: "Asking for a decision",
+    think: "How are decisions usually made in Kenji's company, and who else may need to agree before he can say yes?",
+    draft: "Hi Kenji,\n\nFollowing our call, we need your decision on the new pricing by Friday. Our offer is already very competitive and we can't wait any longer, otherwise we will have to release the reserved trainers.\n\nLet me know ASAP.\n\nThanks,\nAlex",
+    flags: [
+      { re: /we need your decision/i, area: "Adapting to decision styles", kind: "c", q: "Kenji probably can't decide alone. How could you phrase this so it supports his internal process?", hint: "Think about consensus: who else is involved before he can say yes?", principle: "In consensus driven organizations, decisions are built internally before they are announced. Offering support for that process moves things faster than pressure." },
+      { re: /can't wait any longer|otherwise we will/i, area: "Negotiating", kind: "s", q: "How might Kenji feel when he reads this? Does it open options or close them?", hint: "An ultimatum makes the other side defend their position.", principle: "Present a constraint as a shared problem: explain why the date matters to both of you, and offer an alternative." },
+      { re: /\bASAP\b/, area: "Hierarchy and respect", kind: "c", q: "Kenji is a senior client. How formal should your closing request be?", hint: "Abbreviations and imperatives can sound abrupt to senior readers.", principle: "With senior contacts in hierarchical cultures, a polite request with a clear date shows respect." },
+      { re: /^\s*Hi Kenji/i, area: "Hierarchy and respect", kind: "c", q: "How do people usually address a senior client in Japan, early in the relationship?", hint: "Surname plus an honorific.", principle: "Use the surname plus \"san\" (Watanabe-san) until you are invited to do otherwise." }
+    ],
+    rewrite: "Dear Watanabe-san,\n\nThank you very much for your time on Monday's call.\n\nTo support your internal review, I have attached a short summary of the new pricing and the main benefits for Nakamura Logistics.\n\nTo keep the trainers reserved for your team, it would be very helpful to know your direction by Friday 20 November. If your team needs more time or more information, please let me know and we will be happy to adapt.\n\nKind regards,\nAlex"
+  },
+  de: {
+    chip: "Peer colleague · Germany", to: "Lukas Becker <lukas.becker@orionfreight.com>", subj: "Your Q3 report",
+    ctx: [["Reader", "Lukas Becker, Operations Analyst"], ["Region", "Germany · Munich office"], ["Level", "Peer"], ["Relationship", "Colleague · 2 years · weekly"]],
+    purpose: "Giving feedback",
+    think: "Lukas asked for your honest opinion on his report. How direct does he expect your feedback to be?",
+    draft: "Hi Lukas,\n\nThanks so much for sharing the report, it's really great work overall!! Maybe, if you have time and only if you think it makes sense, perhaps you could possibly have a look at some of the numbers in section 3? Not a big deal at all, just a small thought.\n\nThanks a lot,\nAlex",
+    flags: [
+      { re: /perhaps|possibly|if you think it makes sense/i, area: "Directness", kind: "c", q: "Lukas asked for honest feedback. After reading this, will he know what you want him to do?", hint: "Count the softeners in that sentence.", principle: "In direct, task focused cultures, clear and specific feedback is a sign of respect. Too many softeners hide the message." },
+      { re: /some of the numbers/i, area: "Giving feedback", kind: "s", q: "Which numbers, exactly, and what is the problem with them?", hint: "Specific beats general: name the table, the figure and the impact.", principle: "Useful feedback names the specific observation, its impact and a concrete next step." },
+      { re: /Not a big deal/i, area: "Giving feedback", kind: "s", q: "If it is not a big deal, why are you writing? What does this sentence do to your message?", hint: "Minimizing can make the reader ignore the point.", principle: "Don't minimize the point you want acted on. State its importance in neutral terms." }
+    ],
+    rewrite: "Hi Lukas,\n\nThanks for the Q3 report. The structure is clear and the summary is very useful.\n\nOne point to fix before Friday: in section 3, the Hamburg volumes in table 3.2 don't match the totals in the summary. This affects the cost per shipment we present to the board.\n\nCould you check the source data and update the table? Happy to look at it together tomorrow if that helps.\n\nBest,\nAlex"
+  },
+  in: {
+    chip: "Your team · India", to: "Rohan Iyer <rohan.iyer@orionfreight.com>", subj: "Migration plan",
+    ctx: [["Reader", "Rohan Iyer, Junior Analyst"], ["Region", "India · Bangalore office"], ["Level", "Reports to you"], ["Relationship", "Your team · 3 months"]],
+    purpose: "Checking a deadline",
+    think: "Rohan is new and reports to you. How easy is it for him to tell you he has a problem?",
+    draft: "Rohan,\n\nThe migration plan must be ready by Monday. Is that clear? Let me know if there are any problems.\n\nAlex",
+    flags: [
+      { re: /Is that clear\?/i, area: "Checking understanding", kind: "s", q: "What answer will a new team member almost always give to this question?", hint: "Yes or no questions often get a polite yes.", principle: "Open questions such as \"What could get in the way?\" surface real risks. Closed questions to a junior person usually get a yes." },
+      { re: /Let me know if there are any problems/i, area: "Hierarchy and respect", kind: "c", q: "In a hierarchical setting, how likely is Rohan to raise a problem with his manager on his own?", hint: "Make it safe and easy to raise issues, and ask actively.", principle: "Where hierarchy is strong, managers need to invite concerns explicitly and create a moment for them." },
+      { re: /^\s*Rohan,/i, area: "Building rapport", kind: "c", q: "How does this opening feel to someone three months into the team?", hint: "A short personal touch builds trust.", principle: "In relationship oriented cultures, a warm opening makes the rest of the message land better." }
+    ],
+    rewrite: "Hi Rohan,\n\nHope your week is going well, and thanks for your work on the migration so far.\n\nWe need the plan ready by Monday for the steering meeting. How confident do you feel about that date, and what could get in the way?\n\nLet's have a quick 15 minute call tomorrow to go through it together.\n\nThanks,\nAlex"
+  }
+};
+const STAGES = ["Exposure", "Discovery", "Internalization", "Production", "Mastery"];
+let cur = "jp", reviewed = false, help = {}, learned = [];
+
+function stepper(n) { return `<div class="stepper">${STAGES.map((s, i) => `<div class="${i === n ? "on" : i < n ? "past" : ""}">${s}</div>`).join("")}</div>`; }
+function ctxHtml(s) { return `<div class="ctx">${s.ctx.map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join("")}<div style="grid-column:1/-1"><small>Purpose</small><b>${esc(s.purpose)}</b></div></div>`; }
+
+function renderScenarios() {
+  $("#scenarios").innerHTML = Object.entries(SCEN).map(([k, s]) => `<button class="chip ${k === cur ? "on" : ""}" data-k="${k}">${s.chip}</button>`).join("");
+  document.querySelectorAll("#scenarios .chip").forEach((c) => c.addEventListener("click", () => loadScenario(c.dataset.k)));
+}
+function loadScenario(k) {
+  cur = k; reviewed = false; help = {};
+  const s = SCEN[k];
+  $("#cTo").textContent = s.to; $("#cSubj").textContent = s.subj; $("#draft").value = s.draft;
+  showEdit(true);
+  $("#reviewBtn").classList.remove("hidden"); $("#checkBtn").classList.add("hidden"); $("#editBtn").classList.add("hidden");
+  renderScenarios();
+  $("#pane").innerHTML = `${stepper(0)}<h3>Before you write</h3><p class="m-meta" style="margin:-6px 0 0">Context detected from metadata</p>${ctxHtml(s)}<div class="think"><b>Think about</b>${esc(s.think)}</div><p class="note">When your draft is ready, click Review. Coach will point you to what to look at, not rewrite it for you.</p>`;
+}
+function showEdit(on) { $("#draft").classList.toggle("hidden", !on); $("#readview").classList.toggle("hidden", on); }
+
+function status() {
+  const s = SCEN[cur], text = $("#draft").value;
+  return s.flags.map((f, i) => ({ ...f, i, open: f.re.test(text) }));
+}
+function readview(st) {
+  let html = esc($("#draft").value);
+  st.forEach((f) => {
+    if (!f.open) return;
+    const m = $("#draft").value.match(f.re); if (!m) return;
+    const t = esc(m[0]);
+    html = html.replace(t, `<mark>${t}<sup>${f.i + 1}</sup></mark>`);
+  });
+  $("#readview").innerHTML = html;
+}
+function scores(st) {
+  const c = st.filter((f) => f.kind === "c"), s = st.filter((f) => f.kind === "s");
+  const pct = (arr) => arr.length ? Math.round(35 + 65 * arr.filter((f) => !f.open).length / arr.length) : 100;
+  return [pct(c), pct(s)];
+}
+function review() {
+  reviewed = true;
+  const st = status(), [c, s] = scores(st), openN = st.filter((f) => f.open).length;
+  readview(st); showEdit(false);
+  $("#reviewBtn").classList.add("hidden"); $("#editBtn").classList.remove("hidden"); $("#checkBtn").classList.remove("hidden");
+  const allDone = openN === 0;
+  const stage = st.some((f) => !f.open) ? 3 : 1;
+  st.forEach((f) => { if (!f.open && !learned.includes(f.principle)) { learned.push(f.principle); renderPlaybook(); } });
+  $("#pane").innerHTML = `${stepper(stage)}
+    <div class="meters">
+      <div class="meter"><small>Cultural fit</small><div class="bar"><span style="width:${c}%"></span></div></div>
+      <div class="meter"><small>Communication skills</small><div class="bar y"><span style="width:${s}%"></span></div></div>
+    </div>
+    <h3>${allDone ? "Nice work: you adapted it yourself ✓" : `${openN} thing${openN > 1 ? "s" : ""} to look at`}</h3>
+    ${st.map((f) => `
+      <div class="q ${f.open ? "" : "done"}">
+        <div class="area"><span class="num ${f.open ? "" : "done"}">${f.open ? f.i + 1 : "✓"}</span> ${esc(f.area)}</div>
+        ${f.open ? `<p>${esc(f.q)}</p>
+          <div class="actions" style="margin-top:8px"><button class="btn small" data-h="${f.i}" data-l="1">Give me a hint</button><button class="btn small ghost" data-h="${f.i}" data-l="2">Show me the principle</button></div>
+          ${help[f.i] ? `<div class="help">${help[f.i] === 1 ? "💡 " + esc(f.hint) : "📘 " + esc(f.principle)}</div>` : ""}`
+        : `<p class="m-meta">${help[f.i] === 2 ? "Fixed with help." : "You fixed this on your own."}</p>`}
+      </div>`).join("")}
+    ${allDone ? `<div class="tip"><b>Saved to your playbook</b><br>${esc(st[0].principle)}</div>
+      <div class="actions"><button class="btn primary" data-toast="Email sent (demo)">Send email</button><button class="btn" id="toGrowth">See my growth</button></div>`
+    : `<p class="note">Edit your email, then click Check again. Stuck? <a href="#" id="showRw">See a suggested version</a></p><div id="rw"></div>`}`;
+  document.querySelectorAll("[data-h]").forEach((b) => b.addEventListener("click", () => { help[b.dataset.h] = Math.max(help[b.dataset.h] || 0, +b.dataset.l); review(); }));
+  const sr = $("#showRw"); if (sr) sr.addEventListener("click", (e) => { e.preventDefault(); $("#rw").innerHTML = `<div class="rewrite">${esc(SCEN[cur].rewrite)}</div><div class="actions"><button class="btn small" id="useRw">Use this version</button></div>`; $("#useRw").addEventListener("click", () => { SCEN[cur].flags.forEach((f, i) => help[i] = 2); $("#draft").value = SCEN[cur].rewrite; review(); }); });
+  const tg = $("#toGrowth"); if (tg) tg.addEventListener("click", () => goTab("growth"));
+}
+$("#reviewBtn").addEventListener("click", review);
+$("#checkBtn").addEventListener("click", review);
+$("#editBtn").addEventListener("click", () => { showEdit(true); $("#draft").focus(); });
+$("#resetBtn").addEventListener("click", () => loadScenario(cur));
+
+// Growth
+const AREAS = [
+  { a: "Hierarchy and respect", w: "Senior contacts in Asia", fixed: 8, of: 9, st: 4 },
+  { a: "Directness", w: "German and Dutch colleagues", fixed: 4, of: 5, st: 3 },
+  { a: "Adapting to decision styles", w: "Senior clients in Japan and Korea", fixed: 4, of: 7, st: 2 },
+  { a: "Giving feedback", w: "Peers in Europe", fixed: 2, of: 6, st: 1 },
+  { a: "Checking understanding", w: "Your team in India", fixed: 1, of: 4, st: 1 }
+];
+$("#areas").innerHTML = AREAS.map((x) => `<div class="area-row"><div><b>${x.a}</b><div class="m-meta">${x.w}</div></div><div><div class="m-meta">${x.fixed} of ${x.of}</div><div class="bar"><span style="width:${x.fixed / x.of * 100}%"></span></div></div><span class="stage s${x.st + 1}">${STAGES[x.st]}</span></div>`).join("");
+$("#recallBtn").addEventListener("click", () => $("#recallAns").classList.toggle("hidden"));
+function renderPlaybook() {
+  const base = ["Where hierarchy is strong, invite concerns explicitly instead of waiting for them.", "With German peers, specific and direct feedback is a sign of respect."];
+  $("#playbook").innerHTML = [...learned, ...base].slice(0, 5).map((p) => `<li>${esc(p)}</li>`).join("");
+}
+renderPlaybook();
+
+// Share with trainer
+const SHARE_DEFAULT = ["Adapting to decision styles", "Giving feedback"];
+$("#shareAreas").innerHTML = AREAS.map((x) => `<label class="opt"><input type="checkbox" class="sa" value="${x.a}" ${SHARE_DEFAULT.includes(x.a) ? "checked" : ""}><span><b>${x.a}</b> <span class="m-meta">· ${x.w} · ${STAGES[x.st]}</span></span></label>`).join("");
+const PLAN = {
+  "Adapting to decision styles": "Role play: a senior client in Japan asks for more time on a pricing decision.",
+  "Giving feedback": "Practice: turn a vague comment into specific feedback (observation, impact, next step).",
+  "Checking understanding": "Practice: replace closed questions with open ones in a deadline conversation.",
+  "Directness": "Practice: adjust the same message for a direct and an indirect reader.",
+  "Hierarchy and respect": "Practice: make a firm request to a senior stakeholder, politely."
+};
+$("#previewBrief").addEventListener("click", () => {
+  const sel = [...document.querySelectorAll(".sa:checked")].map((c) => c.value);
+  if (!sel.length) { toast("Choose at least one area to share"); return; }
+  const goal = $("#goal").value.trim(), ex = $("#shareEx").checked;
+  const rows = AREAS.filter((x) => sel.includes(x.a));
+  $("#briefWrap").innerHTML = `
+    <div class="brief">
+      <span class="m-meta">Session brief · what Claire will receive</span>
+      <h2 style="margin-top:6px">Alex M. · session on Thursday 19 Nov</h2>
+      ${goal ? `<h4>Learner goal</h4><p style="margin:0">"${esc(goal)}"</p>` : ""}
+      <h4>Focus areas from real emails, last 30 days</h4>
+      <ul>${rows.map((x) => `<li><b>${x.a}</b>: ${x.w}. Flagged ${x.of} times, fixed on own ${x.fixed} of ${x.of}. Stage: ${STAGES[x.st]}.</li>`).join("")}</ul>
+      ${ex ? `<h4>Real examples, anonymized</h4>
+      <div class="ex"><div><b>Before</b>"We need your decision on the new pricing by Friday. [...] we can't wait any longer."</div><div><b>After (Alex's own edit)</b>"To support your internal review, I have attached a short summary [...] it would be very helpful to know your direction by Friday."</div></div>
+      <div class="ex"><div><b>Before</b>"Perhaps you could possibly have a look at some of the numbers? Not a big deal at all."</div><div><b>Still open</b>Alex has not yet found a version that feels both direct and comfortable.</div></div>` : ""}
+      <h4>Suggested session plan</h4>
+      <div class="pcc">
+        <div><b>Prepare</b>Alex reviews the 2 examples and a 5 minute micro lesson before the session.</div>
+        <div><b>Connect</b>${rows.map((x) => esc(PLAN[x.a])).join(" ")}</div>
+        <div><b>Consolidate</b>For 2 weeks, PRO tracks these areas in Alex's emails and shares progress with Alex and Claire.</div>
+      </div>
+      <div class="actions"><button class="btn primary" id="sendBrief">Send to Claire</button><button class="btn" id="editBrief">Change what I share</button></div>
+      <div id="sentMsg"></div>
+    </div>`;
+  $("#briefWrap").classList.remove("hidden");
+  $("#briefWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#sendBrief").addEventListener("click", () => { $("#sentMsg").innerHTML = `<div class="sent">✓ Shared with Claire. She will use it to prepare Thursday's session.</div>`; $("#sendBrief").disabled = true; });
+  $("#editBrief").addEventListener("click", () => $("#shareCard").scrollIntoView({ behavior: "smooth" }));
+});
+
+// Learnlight Insights
+const CLIENTS = ["Orion Freight Group", "Helix Pharma", "Norte Energy"];
+$("#clients").innerHTML = CLIENTS.map((c, i) => `<button class="chip ${i === 0 ? "on" : ""}" ${i ? `data-toast="Demo shows Orion Freight Group only"` : ""}>${c}</button>`).join("");
+const REG = [["Germany", 26, 3], ["Japan", 19, 42], ["India", 16, 18], ["United States", 14, -5], ["Brazil", 9, 27], ["France", 8, 1], ["Other", 8, 4]];
+$("#regions").innerHTML = REG.map(([r, v, d]) => `<div class="reg"><span>${r}</span><div class="bar"><span style="width:${v / 26 * 100}%"></span></div><b>${v}%</b><span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "▲" : "▼"} ${Math.abs(d)}%</span></div>`).join("");
+const NEEDS = [
+  ["ict", "Working with Japan", "Procurement and Sales APAC: interactions with Japan up 42%; decision style patterns 3 times the company average. 4 of 61 people trained.", "Next quarter", "high", "Working Effectively With Japan workshop"],
+  ["ips", "Feedback across cultures", "11 new managers in the last 6 months lead remote teams in India; checking understanding patterns rising.", "Now", "high", "Giving Feedback Across Cultures program"],
+  ["ips", "Negotiation", "Sales EMEA: negotiation threads up 30% ahead of renewal season.", "6 to 8 weeks", "med", "Negotiation Skills program"],
+  ["ict", "Working with Brazil", "New market: interactions up 27%, 0 people trained.", "In 2 quarters", "med", "CultureConnector Brazil and a short webinar"]
+];
+$("#needs").innerHTML = NEEDS.map(([l, n, s, w, c, o]) => `<tr><td><span class="line l-${l}">${l.toUpperCase()}</span><div style="margin-top:4px"><b>${n}</b></div><span class="conf c-${c}">${c === "high" ? "High confidence" : "Medium confidence"}</span></td><td>${s}</td><td style="white-space:nowrap">${w}</td><td>${o}</td></tr>`).join("");
+
+// Tabs and views
+function goTab(name) {
+  document.querySelectorAll("#nav button").forEach((x) => x.classList.toggle("active", x.dataset.tab === name));
+  document.querySelectorAll("main > section").forEach((s) => s.classList.toggle("hidden", s.id !== "tab-" + name));
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("#nav button").forEach((b) => b.addEventListener("click", () => goTab(b.dataset.tab)));
+document.querySelectorAll("#viewSeg button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#viewSeg button").forEach((x) => x.classList.toggle("on", x === b));
+  const ll = b.dataset.view === "ll";
+  $("#nav").classList.toggle("hidden", ll);
+  document.querySelector(".who").textContent = ll ? "Learnlight · Account team" : "Alex Morgan · Orion Freight Group";
+  document.querySelector("header .avatar").textContent = ll ? "LL" : "AM";
+  goTab(ll ? "ll" : "coach");
+}));
+
+// Onboarding
+const ob = $("#onboard");
+$("#openPrivacy").addEventListener("click", () => ob.classList.remove("hidden"));
+$("#startBtn").addEventListener("click", () => { ob.classList.add("hidden"); try { sessionStorage.setItem("llp3", "1"); } catch (e) {} });
+let seen = false; try { seen = sessionStorage.getItem("llp3") === "1"; } catch (e) {}
+if (!seen) ob.classList.remove("hidden");
+
+loadScenario("jp");
+
+// Theme from Teams
+function setTheme(t) { document.body.classList.toggle("dark", t === "dark" || t === "contrast"); }
+if (window.matchMedia) setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default");
+try { if (window.microsoftTeams && microsoftTeams.app) microsoftTeams.app.initialize().then(() => microsoftTeams.app.getContext()).then((ctx) => { setTheme(ctx.app && ctx.app.theme); microsoftTeams.app.registerOnThemeChangeHandler(setTheme); }).catch(() => {}); } catch (e) {}
+</script>
+</body>
+</html>
